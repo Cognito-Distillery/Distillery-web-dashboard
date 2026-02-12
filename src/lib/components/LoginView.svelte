@@ -49,6 +49,7 @@
 <div class="flex h-screen items-center justify-center">
 	<div class="w-full max-w-sm flex flex-col gap-6 px-6">
 		<div class="text-center">
+			<img src="/favicon.svg" alt="Logo" class="w-24 h-24 mx-auto mb-3" />
 			<h1 class="text-2xl font-bold tracking-tight">{t('topbar.title')}</h1>
 			<p class="text-sm text-base-content/40 mt-1">{t('login.title')}</p>
 		</div>
