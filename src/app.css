@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+@plugin 'daisyui';
+
+@theme {
+	--font-sans: 'Nanum Myeongjo', serif;
+}
+
+@plugin "daisyui/theme" {
+	name: "pitch";
+	default: true;
+	color-scheme: dark;
+
+	/* pure black base */
+	--color-base-100: oklch(0% 0 0);
+	--color-base-200: oklch(0% 0 0);
+	--color-base-300: oklch(18% 0.005 60);
+
+	/* warm off-white text */
+	--color-base-content: oklch(90% 0.01 80);
+
+	/* amber — aged whiskey */
+	--color-primary: oklch(72% 0.14 70);
+	--color-primary-content: oklch(10% 0.02 70);
+
+	/* copper still */
+	--color-secondary: oklch(58% 0.12 55);
+	--color-secondary-content: oklch(95% 0.01 55);
+
+	/* deep oak */
+	--color-accent: oklch(45% 0.08 50);
+	--color-accent-content: oklch(92% 0.01 50);
+
+	--color-neutral: oklch(16% 0.005 60);
+	--color-neutral-content: oklch(80% 0.01 60);
+
+	/* status colors */
+	--color-info: oklch(62% 0.12 240);
+	--color-info-content: oklch(95% 0.01 240);
+
+	--color-success: oklch(65% 0.14 155);
+	--color-success-content: oklch(95% 0.01 155);
+
+	--color-warning: oklch(78% 0.15 75);
+	--color-warning-content: oklch(12% 0.03 75);
+
+	--color-error: oklch(55% 0.18 20);
+	--color-error-content: oklch(95% 0.01 20);
+}
+
+/* sharp font rendering */
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+/* warm scrollbar */
+::-webkit-scrollbar {
+	width: 6px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: oklch(25% 0.01 60);
+	border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: oklch(35% 0.02 60);
+}
