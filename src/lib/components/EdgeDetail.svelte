@@ -58,7 +58,9 @@
 		</div>
 
 		<div class="space-y-1 text-xs text-base-content/50">
-			<div>{t('edge.source')}: <span class="badge badge-xs">{edge.source}</span></div>
+			{#if edge.source}
+				<div>{t('edge.source')}: <span class="badge badge-xs">{edge.source}</span></div>
+			{/if}
 			{#if edge.confidence != null}
 				<div>{t('edge.confidence')}: {(edge.confidence * 100).toFixed(0)}%</div>
 			{/if}

@@ -1,6 +1,7 @@
 import type cytoscape from 'cytoscape';
 import { graphStore } from '$lib/stores/graph.svelte';
 import { uiStore } from '$lib/stores/ui.svelte';
+import { toastStore } from '$lib/stores/toast.svelte';
 import { parseEdgeId } from '$lib/utils/edge-id';
 import { expandNode } from '$lib/api/graph';
 import { mockFetchNodeDetail, mockGraphData } from '$lib/mock/graph-data';
@@ -92,7 +93,7 @@ export function setupDoubleClickEvents(cy: cytoscape.Core) {
 				graphStore.mergeGraphData(data);
 			}
 		} catch {
-			uiStore.setError(t('error.expandNode'));
+			toastStore.show(t('error.expandNode'));
 		}
 	});
 }

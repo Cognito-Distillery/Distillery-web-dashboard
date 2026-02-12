@@ -4,16 +4,23 @@ const en: Messages = {
 	// Login
 	'login.title': 'Cognito Distillery',
 	'login.email': 'Email',
-	'login.sendOtp': 'Request Access',
-	'login.otpSent': 'OTP has been sent',
-	'login.verify': 'Verify',
-	'login.back': 'Back',
+	'login.sendOtp': 'Request Access Code',
+	'login.otpSent': 'Enter the access code sent via Slack DM.',
+	'login.verify': 'Enter',
+	'login.tryOther': 'Try another email',
 	'login.otpPlaceholder': '000000',
+	'login.errorNetwork': 'Unable to connect to the server.',
+	'login.errorInvalidOtp': 'Invalid access code.',
+	'login.errorGeneric': 'Something went wrong. Please try again.',
 
 	// TopBar
 	'topbar.title': 'Blending Room',
 	'topbar.search': 'Search keywords...',
+	'topbar.searchServer': 'Search server keywords...',
 	'topbar.searchNatural': 'Ask in natural language...',
+	'topbar.searchTipLocal': 'Search loaded data by keyword',
+	'topbar.searchTipKeyword': 'Search full graph by keyword',
+	'topbar.searchTipNatural': 'Search full graph in natural language',
 
 	// SidePanel
 	'panel.filters': 'Filters',
@@ -88,9 +95,11 @@ const en: Messages = {
 
 	// Errors
 	'error.loadGraph': 'Failed to load graph data',
+	'error.renderGraph': 'Failed to render the graph.',
 	'error.expandNode': 'Failed to expand node',
 	'error.saveNode': 'Failed to save node',
 	'error.saveEdge': 'Failed to save edge',
+	'error.searchFailed': 'Search failed.',
 	'error.dismiss': 'Dismiss'
 };
 

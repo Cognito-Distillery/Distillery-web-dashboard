@@ -1,12 +1,12 @@
 import type { GraphNode } from '$lib/types/graph';
 
-export type SearchMode = 'keyword' | 'natural';
+export type SearchMode = 'local' | 'keyword' | 'natural';
 
 function createSearchStore() {
 	let query = $state('');
 	let results = $state<GraphNode[]>([]);
 	let isSearching = $state(false);
-	let mode = $state<SearchMode>('keyword');
+	let mode = $state<SearchMode>('local');
 
 	return {
 		get query() {
@@ -35,7 +35,8 @@ function createSearchStore() {
 			mode = m;
 		},
 		toggleMode() {
-			mode = mode === 'keyword' ? 'natural' : 'keyword';
+			const modes: SearchMode[] = ['local', 'keyword', 'natural'];
+			mode = modes[(modes.indexOf(mode) + 1) % modes.length];
 		},
 		clear() {
 			query = '';

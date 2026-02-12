@@ -9,6 +9,13 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
+	function friendlyError(e: unknown, fallbackKey: 'login.errorInvalidOtp' | 'login.errorGeneric'): string {
+		if (e instanceof TypeError) return t('login.errorNetwork');
+		const status = (e as { status?: number })?.status;
+		if (status === 401 || status === 400) return t(fallbackKey);
+		return t('login.errorGeneric');
+	}
+
 	async function handleSendOtp(e: Event) {
 		e.preventDefault();
 		if (!email.trim()) return;
@@ -17,8 +24,8 @@
 		try {
 			await sendOtp(email.trim());
 			step = 'otp';
-		} catch (e: unknown) {
-			error = (e as { message?: string })?.message ?? 'Failed to send OTP';
+		} catch (err: unknown) {
+			error = friendlyError(err, 'login.errorGeneric');
 		} finally {
 			loading = false;
 		}
@@ -32,8 +39,8 @@
 		try {
 			const res = await verifyOtp(email.trim(), otp.trim());
 			authStore.setTokens(res.accessToken, res.refreshToken, email.trim());
-		} catch (e: unknown) {
-			error = (e as { message?: string })?.message ?? 'Invalid OTP';
+		} catch (err: unknown) {
+			error = friendlyError(err, 'login.errorInvalidOtp');
 		} finally {
 			loading = false;
 		}
@@ -50,8 +57,8 @@
 	<div class="w-full max-w-sm flex flex-col gap-6 px-6">
 		<div class="text-center">
 			<img src="/favicon.svg" alt="Logo" class="w-24 h-24 mx-auto mb-3" />
-			<h1 class="text-2xl font-bold tracking-tight">{t('topbar.title')}</h1>
-			<p class="text-sm text-base-content/40 mt-1">{t('login.title')}</p>
+			<h1 class="text-2xl font-bold tracking-tight">Cognito Distillery Blending Room</h1>
+			<p class="text-sm text-base-content/40 mt-1">Distill your thoughts</p>
 		</div>
 
 		{#if step === 'email'}
@@ -101,7 +108,7 @@
 					{/if}
 				</button>
 				<button type="button" class="btn btn-ghost btn-sm" onclick={handleBack}>
-					{t('login.back')}
+					{t('login.tryOther')}
 				</button>
 			</form>
 		{/if}

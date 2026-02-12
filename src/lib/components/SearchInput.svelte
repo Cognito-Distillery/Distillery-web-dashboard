@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { searchStore } from '$lib/stores/search.svelte';
+	import type { SearchMode } from '$lib/stores/search.svelte';
 	import { graphStore } from '$lib/stores/graph.svelte';
-	import { naturalSearch } from '$lib/api/search';
+	import { naturalSearch, keywordSearch } from '$lib/api/search';
 	import { debounce } from '$lib/utils/debounce';
+	import { matchKorean } from '$lib/utils/chosung';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import { t } from '$lib/i18n/index.svelte';
+	import type { MessageKey } from '$lib/i18n/ko';
 
 	interface Props {
 		onfocus?: (nodeId: string) => void;
@@ -11,21 +15,46 @@
 
 	let { onfocus }: Props = $props();
 	let showDropdown = $state(false);
+	let showModeMenu = $state(false);
 
-	const doKeywordSearch = debounce((q: string) => {
+	const modeOptions: { value: SearchMode; label: string; tipKey: MessageKey }[] = [
+		{ value: 'local', label: 'LK', tipKey: 'topbar.searchTipLocal' },
+		{ value: 'keyword', label: 'K', tipKey: 'topbar.searchTipKeyword' },
+		{ value: 'natural', label: 'N', tipKey: 'topbar.searchTipNatural' }
+	];
+
+	const doLocalSearch = debounce((q: string) => {
 		if (!q.trim()) {
 			searchStore.setResults([]);
 			return;
 		}
-		const lower = q.toLowerCase();
 		const matched = graphStore.nodes.filter(
 			(n) =>
-				n.summary.toLowerCase().includes(lower) ||
-				n.context.toLowerCase().includes(lower) ||
-				n.memo.toLowerCase().includes(lower)
+				matchKorean(n.summary, q) ||
+				matchKorean(n.context, q) ||
+				matchKorean(n.memo, q)
 		);
 		searchStore.setResults(matched);
 	}, 200);
+
+	async function doServerKeywordSearch(q: string) {
+		if (!q.trim()) {
+			searchStore.setResults([]);
+			return;
+		}
+		searchStore.setSearching(true);
+		try {
+			const res = await keywordSearch(q);
+			searchStore.setResults(res.nodes);
+			graphStore.mergeGraphData({ nodes: res.nodes, edges: res.edges });
+			showDropdown = res.nodes.length > 0;
+		} catch {
+			searchStore.setResults([]);
+			toastStore.show(t('error.searchFailed'));
+		} finally {
+			searchStore.setSearching(false);
+		}
+	}
 
 	async function doNaturalSearch(q: string) {
 		if (!q.trim()) {
@@ -36,9 +65,11 @@
 		try {
 			const res = await naturalSearch(q);
 			searchStore.setResults(res.nodes);
+			graphStore.mergeGraphData({ nodes: res.nodes, edges: res.edges });
 			showDropdown = res.nodes.length > 0;
 		} catch {
 			searchStore.setResults([]);
+			toastStore.show(t('error.searchFailed'));
 		} finally {
 			searchStore.setSearching(false);
 		}
@@ -48,15 +79,19 @@
 		const val = (e.target as HTMLInputElement).value;
 		searchStore.setQuery(val);
 		showDropdown = true;
-		if (searchStore.mode === 'keyword') {
-			doKeywordSearch(val);
+		if (searchStore.mode === 'local') {
+			doLocalSearch(val);
 		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (searchStore.mode === 'natural' && e.key === 'Enter') {
+		if (searchStore.mode !== 'local' && e.key === 'Enter') {
 			e.preventDefault();
-			doNaturalSearch(searchStore.query);
+			if (searchStore.mode === 'keyword') {
+				doServerKeywordSearch(searchStore.query);
+			} else {
+				doNaturalSearch(searchStore.query);
+			}
 		}
 	}
 
@@ -67,26 +102,54 @@
 		onfocus?.(nodeId);
 	}
 
-	function toggleMode() {
-		searchStore.toggleMode();
+	function selectMode(mode: SearchMode) {
+		searchStore.setMode(mode);
 		searchStore.clear();
 		showDropdown = false;
+		showModeMenu = false;
 	}
 
 	let placeholder = $derived(
-		searchStore.mode === 'keyword' ? t('topbar.search') : t('topbar.searchNatural')
+		searchStore.mode === 'local'
+			? t('topbar.search')
+			: searchStore.mode === 'keyword'
+				? t('topbar.searchServer')
+				: t('topbar.searchNatural')
+	);
+
+	let currentModeLabel = $derived(
+		modeOptions.find((m) => m.value === searchStore.mode)!.label
 	);
 </script>
 
 <div class="relative">
 	<div class="flex items-center bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg focus-within:border-primary/50 transition-colors">
-		<button
-			class="shrink-0 px-2 py-1 text-[10px] font-mono font-bold transition-colors {searchStore.mode === 'natural' ? 'text-primary' : 'text-base-content/30'}"
-			onclick={toggleMode}
-			title={searchStore.mode === 'keyword' ? 'Switch to natural language' : 'Switch to keyword'}
-		>
-			{searchStore.mode === 'keyword' ? 'K' : 'N'}
-		</button>
+		<!-- Mode dropdown trigger -->
+		<div class="relative">
+			<button
+				class="shrink-0 px-2 py-1 text-[10px] font-mono font-bold text-primary hover:text-primary/80 transition-colors"
+				onclick={() => (showModeMenu = !showModeMenu)}
+				onblur={() => setTimeout(() => (showModeMenu = false), 150)}
+			>
+				{currentModeLabel} ▾
+			</button>
+			{#if showModeMenu}
+				<ul class="absolute top-full left-0 mt-1 bg-black/90 backdrop-blur-md rounded-lg shadow-xl border border-white/[0.08] z-50 min-w-max p-1">
+					{#each modeOptions as opt}
+						<li>
+							<button
+								class="w-full text-left text-[11px] font-mono px-3 py-1.5 rounded transition-colors
+									{searchStore.mode === opt.value ? 'text-primary bg-white/[0.08]' : 'text-base-content/60 hover:bg-white/[0.06]'}"
+								onmousedown={() => selectMode(opt.value)}
+								title={t(opt.tipKey)}
+							>
+								{opt.label}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
 		<input
 			type="text"
 			{placeholder}

@@ -4,6 +4,8 @@
 	import cola from 'cytoscape-cola';
 	import { graphStore } from '$lib/stores/graph.svelte';
 	import { uiStore } from '$lib/stores/ui.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
+	import { t } from '$lib/i18n/index.svelte';
 	import { defaultCytoscapeOptions, cytoscapeLayout } from '$lib/graph/cytoscape-config';
 	import {
 		setupNodeEvents,
@@ -43,24 +45,28 @@
 	onMount(() => {
 		if (!container) return;
 
-		cy = cytoscape({
-			container,
-			elements: graphStore.cytoscapeElements,
-			...defaultCytoscapeOptions
-		});
+		try {
+			cy = cytoscape({
+				container,
+				elements: graphStore.cytoscapeElements,
+				...defaultCytoscapeOptions
+			});
 
-		setupNodeEvents(cy);
-		setupHoverEvents(cy);
-		setupDoubleClickEvents(cy);
-		createContextMenuHandler(cy, (state) => {
-			contextMenu = state;
-		});
+			setupNodeEvents(cy);
+			setupHoverEvents(cy);
+			setupDoubleClickEvents(cy);
+			createContextMenuHandler(cy, (state) => {
+				contextMenu = state;
+			});
 
-		prevElementIds = new Set(graphStore.cytoscapeElements.map((el) => el.data.id));
+			prevElementIds = new Set(graphStore.cytoscapeElements.map((el) => el.data.id));
 
-		// Start physics layout, then fit after initial settle
-		startLayout();
-		setTimeout(() => cy?.fit(undefined, 60), 800);
+			// Start physics layout, then fit after initial settle
+			startLayout();
+			setTimeout(() => cy?.fit(undefined, 60), 800);
+		} catch {
+			toastStore.show(t('error.renderGraph'));
+		}
 
 		return () => {
 			layout?.stop();
@@ -71,36 +77,40 @@
 	// Sync store elements → Cytoscape
 	$effect(() => {
 		if (!cy) return;
-		const elements = graphStore.cytoscapeElements;
-		const newIds = new Set(elements.map((el) => el.data.id));
+		try {
+			const elements = graphStore.cytoscapeElements;
+			const newIds = new Set(elements.map((el) => el.data.id));
 
-		let changed = false;
+			let changed = false;
 
-		cy.batch(() => {
-			for (const id of prevElementIds) {
-				if (!newIds.has(id)) {
-					const ele = cy!.getElementById(id);
-					if (ele.length) cy!.remove(ele);
-					changed = true;
+			cy.batch(() => {
+				for (const id of prevElementIds) {
+					if (!newIds.has(id)) {
+						const ele = cy!.getElementById(id);
+						if (ele.length) cy!.remove(ele);
+						changed = true;
+					}
 				}
+
+				for (const el of elements) {
+					const existing = cy!.getElementById(el.data.id);
+					if (existing.length) {
+						existing.data(el.data);
+					} else {
+						cy!.add(el as cytoscape.ElementDefinition);
+						changed = true;
+					}
+				}
+			});
+
+			if (changed) {
+				startLayout();
 			}
 
-			for (const el of elements) {
-				const existing = cy!.getElementById(el.data.id);
-				if (existing.length) {
-					existing.data(el.data);
-				} else {
-					cy!.add(el as cytoscape.ElementDefinition);
-					changed = true;
-				}
-			}
-		});
-
-		if (changed) {
-			startLayout();
+			prevElementIds = newIds;
+		} catch {
+			toastStore.show(t('error.renderGraph'));
 		}
-
-		prevElementIds = newIds;
 	});
 
 	// Pan to selected node

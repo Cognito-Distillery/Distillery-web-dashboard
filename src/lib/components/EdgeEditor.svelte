@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { graphStore } from '$lib/stores/graph.svelte';
 	import { uiStore } from '$lib/stores/ui.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import { t } from '$lib/i18n/index.svelte';
 	import type { RelationType } from '$lib/types/graph';
 
@@ -47,7 +48,7 @@
 				uiStore.setSidePanelMode('detail');
 			}
 		} catch {
-			uiStore.setError(t('error.saveEdge'));
+			toastStore.show(t('error.saveEdge'));
 		} finally {
 			saving = false;
 		}

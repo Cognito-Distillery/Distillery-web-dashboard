@@ -3,15 +3,22 @@ const ko = {
 	'login.title': 'Cognito Distillery',
 	'login.email': '이메일',
 	'login.sendOtp': '출입 인증 요청',
-	'login.otpSent': 'OTP가 발송되었습니다',
-	'login.verify': '인증',
-	'login.back': '뒤로',
+	'login.otpSent': 'Slack DM으로 전송된 출입 코드를 입력하세요.',
+	'login.verify': '입장하기',
+	'login.tryOther': '다른 이메일로 시도',
 	'login.otpPlaceholder': '000000',
+	'login.errorNetwork': '서버에 연결할 수 없습니다.',
+	'login.errorInvalidOtp': '인증 코드가 올바르지 않습니다.',
+	'login.errorGeneric': '문제가 발생했습니다. 다시 시도해주세요.',
 
 	// TopBar
 	'topbar.title': 'Blending Room',
 	'topbar.search': '키워드 검색...',
+	'topbar.searchServer': '서버 키워드 검색...',
 	'topbar.searchNatural': '자연어로 질문...',
+	'topbar.searchTipLocal': '불러온 데이터 내 키워드 검색',
+	'topbar.searchTipKeyword': '서버 전체 그래프 키워드 검색',
+	'topbar.searchTipNatural': '서버 전체 그래프 자연어 검색',
 
 	// SidePanel
 	'panel.filters': '필터',
@@ -86,9 +93,11 @@ const ko = {
 
 	// Errors
 	'error.loadGraph': '그래프 데이터를 불러오지 못했습니다',
+	'error.renderGraph': '그래프를 그리는 중 문제가 발생했습니다.',
 	'error.expandNode': '노드를 확장하지 못했습니다',
 	'error.saveNode': '노드를 저장하지 못했습니다',
 	'error.saveEdge': '엣지를 저장하지 못했습니다',
+	'error.searchFailed': '검색에 실패했습니다.',
 	'error.dismiss': '닫기'
 } as const;
 

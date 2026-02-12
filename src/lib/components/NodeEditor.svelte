@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { graphStore } from '$lib/stores/graph.svelte';
 	import { uiStore } from '$lib/stores/ui.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import { t } from '$lib/i18n/index.svelte';
 
 	let summary = $state(graphStore.selectedNode?.summary ?? '');
@@ -23,7 +24,7 @@
 			graphStore.updateNode(graphStore.selectedNodeId, { summary, context, memo });
 			uiStore.setSidePanelMode('detail');
 		} catch {
-			uiStore.setError(t('error.saveNode'));
+			toastStore.show(t('error.saveNode'));
 		} finally {
 			saving = false;
 		}

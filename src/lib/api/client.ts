@@ -62,7 +62,9 @@ async function request<T>(path: string, options: RequestInit = {}, retry = true)
 		const error = await res.json().catch(() => ({ message: res.statusText }));
 		throw { message: error.message, status: res.status } satisfies ApiError;
 	}
-	return res.json();
+	return res.json().catch(() => {
+		throw { message: res.statusText, status: res.status } satisfies ApiError;
+	});
 }
 
 export const api = {

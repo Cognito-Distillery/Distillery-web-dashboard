@@ -10,10 +10,10 @@
 
 		if (a && r) {
 			authStore.setTokens(a, r, '');
-			goto('/', { replaceState: true });
-		} else {
-			goto('/', { replaceState: true });
 		}
+		goto('/', { replaceState: true }).catch(() => {
+			window.location.href = '/';
+		});
 	});
 </script>
 

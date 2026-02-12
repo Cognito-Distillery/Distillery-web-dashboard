@@ -4,7 +4,6 @@ function createUIStore() {
 	let sidePanelOpen = $state(true);
 	let sidePanelMode = $state<SidePanelMode>('filter');
 	let isLoading = $state(false);
-	let error = $state<string | null>(null);
 	let confirmDialog = $state<{ message: string; onConfirm: () => void } | null>(null);
 	let addEdgeSourceId = $state<string | null>(null);
 
@@ -17,9 +16,6 @@ function createUIStore() {
 		},
 		get isLoading() {
 			return isLoading;
-		},
-		get error() {
-			return error;
 		},
 		get confirmDialog() {
 			return confirmDialog;
@@ -37,9 +33,6 @@ function createUIStore() {
 		},
 		setLoading(val: boolean) {
 			isLoading = val;
-		},
-		setError(msg: string | null) {
-			error = msg;
 		},
 		showConfirm(message: string, onConfirm: () => void) {
 			confirmDialog = { message, onConfirm };

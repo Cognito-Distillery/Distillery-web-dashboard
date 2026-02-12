@@ -2,6 +2,7 @@
 	import '../app.css';
 	import SidePanel from '$lib/components/SidePanel.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import Toast from '$lib/components/Toast.svelte';
 	import LoginView from '$lib/components/LoginView.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 
@@ -20,3 +21,5 @@
 
 	<ConfirmDialog />
 {/if}
+
+<Toast />

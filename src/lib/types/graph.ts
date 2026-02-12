@@ -15,8 +15,8 @@ export interface GraphEdge {
 	sourceId: string;
 	targetId: string;
 	relationType: RelationType;
-	source: EdgeSource;
-	confidence?: number;
+	source?: EdgeSource;
+	confidence?: number | null;
 	createdAt?: string;
 	updatedAt?: string;
 }
@@ -46,8 +46,8 @@ export interface CytoscapeEdgeData {
 	source: string;
 	target: string;
 	relationType: RelationType;
-	edgeSource: EdgeSource;
-	confidence?: number;
+	edgeSource?: EdgeSource;
+	confidence?: number | null;
 }
 
 export type CytoscapeElement =
