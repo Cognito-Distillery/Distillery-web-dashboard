@@ -1,7 +1,13 @@
 {
 	"name": "blending-room",
-	"private": true,
-	"version": "0.0.1",
+	"version": "0.1.0",
+	"description": "A web dashboard for exploring and editing the Distillery knowledge graph",
+	"author": "Cognito-Distillery",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Cognito-Distillery/Distillery-web-dashboard"
+	},
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",

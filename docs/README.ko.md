@@ -67,16 +67,23 @@ Blending Room은 **Distillery** 지식 그래프를 위한 웹 대시보드입�
 ### 사전 요구사항
 
 - [Bun](https://bun.sh) (또는 Node.js)
-- Distillery Elysia 백엔드 서버 실행 중
+- [Distillery 서버](https://github.com/Cognito-Distillery) 실행 중
 
 ### 설치
 
 ```bash
 bun install
 
-cp .env.sample .env
-# .env 파일에서 VITE_API_URL 설정 (기본값: http://localhost:3000)
+cp .env.example .env
+# .env 파일에서 VITE_API_URL 설정 (기본값: http://localhost:8710)
 ```
+
+### 환경 변수
+
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `VITE_API_URL` | Distillery Elysia 백엔드 URL | `http://localhost:8710` |
+| `VITE_USE_MOCK` | 백엔드 API 대신 목 데이터 사용 | `false` |
 
 ### 개발
 
@@ -96,6 +103,101 @@ bun run preview
 ```bash
 bun run check
 ```
+
+---
+
+## 셀프 호스팅
+
+Blending Room은 SvelteKit 앱입니다. **Node.js 서버** 또는 **정적 파일**로 배포할 수 있습니다.
+
+### 방법 1: Node.js 서버
+
+`adapter-auto`를 `adapter-node`로 전환합니다:
+
+```bash
+bun add -d @sveltejs/adapter-node
+```
+
+`svelte.config.js` 수정:
+
+```js
+import adapter from '@sveltejs/adapter-node';
+
+const config = {
+  kit: {
+    adapter: adapter()
+  }
+};
+
+export default config;
+```
+
+빌드 후 실행:
+
+```bash
+bun run build
+
+# 결과물은 build/ 디렉토리에 생성됩니다
+VITE_API_URL=https://your-api.example.com node build
+```
+
+기본 포트는 `8711`입니다. `PORT` 환경 변수로 변경할 수 있습니다.
+
+### 방법 2: 정적 사이트
+
+SSR이 필요 없다면 `adapter-static`으로 전환합니다:
+
+```bash
+bun add -d @sveltejs/adapter-static
+```
+
+`svelte.config.js` 수정:
+
+```js
+import adapter from '@sveltejs/adapter-static';
+
+const config = {
+  kit: {
+    adapter: adapter({ fallback: 'index.html' })
+  }
+};
+
+export default config;
+```
+
+빌드 후 원하는 웹 서버(nginx, caddy 등)로 서빙:
+
+```bash
+bun run build
+
+# 결과물은 build/ 디렉토리에 생성됩니다
+# 원하는 웹 서버로 서빙하세요
+```
+
+### 리버스 프록시
+
+리버스 프록시 뒤에서 운영할 때 주의사항:
+
+1. `VITE_API_URL`은 **빌드 시점**에 설정해야 합니다 (클라이언트 번들에 포함됨)
+2. API 요청을 프록시하거나, Elysia 백엔드에서 CORS를 설정하세요
+
+<details>
+<summary>Nginx 예시</summary>
+
+```nginx
+server {
+    listen 80;
+    server_name blending.example.com;
+
+    location / {
+        proxy_pass http://localhost:8711;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+</details>
 
 ---
 
@@ -128,6 +230,12 @@ src/
 │   ├── mock/           # 개발용 목 데이터
 │   └── utils/          # 유틸리티 (edge-id, debounce)
 ```
+
+---
+
+## 라이선스
+
+[MIT](../LICENSE)
 
 ---
 

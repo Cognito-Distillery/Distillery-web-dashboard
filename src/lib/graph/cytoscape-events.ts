@@ -8,7 +8,7 @@ import { mockFetchNodeDetail, mockGraphData } from '$lib/mock/graph-data';
 import { nodeMenuItems, edgeMenuItems, canvasMenuItems, type ContextMenuItem } from './context-menu';
 import { t } from '$lib/i18n/index.svelte';
 
-const USE_MOCK = true;
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export interface ContextMenuState {
 	visible: boolean;

@@ -67,16 +67,23 @@ Runtime    Bun
 ### Prerequisites
 
 - [Bun](https://bun.sh) (or Node.js)
-- Distillery Elysia backend server running
+- [Distillery server](https://github.com/Cognito-Distillery) running
 
 ### Install
 
 ```bash
 bun install
 
-cp .env.sample .env
-# Edit .env and set VITE_API_URL (default: http://localhost:3000)
+cp .env.example .env
+# Edit .env and set VITE_API_URL (default: http://localhost:8710)
 ```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Distillery Elysia backend URL | `http://localhost:8710` |
+| `VITE_USE_MOCK` | Use mock data instead of backend API | `false` |
 
 ### Develop
 
@@ -96,6 +103,101 @@ bun run preview
 ```bash
 bun run check
 ```
+
+---
+
+## Self-Hosting
+
+Blending Room is a SvelteKit app. You can deploy it as a **Node.js server** or as **static files** behind any web server.
+
+### Option 1: Node.js Server
+
+Switch from `adapter-auto` to `adapter-node`:
+
+```bash
+bun add -d @sveltejs/adapter-node
+```
+
+Update `svelte.config.js`:
+
+```js
+import adapter from '@sveltejs/adapter-node';
+
+const config = {
+  kit: {
+    adapter: adapter()
+  }
+};
+
+export default config;
+```
+
+Build and run:
+
+```bash
+bun run build
+
+# The output is in the build/ directory
+VITE_API_URL=https://your-api.example.com node build
+```
+
+The server listens on port `8711` by default. Set the `PORT` environment variable to change it.
+
+### Option 2: Static Site
+
+If you don't need SSR, switch to `adapter-static`:
+
+```bash
+bun add -d @sveltejs/adapter-static
+```
+
+Update `svelte.config.js`:
+
+```js
+import adapter from '@sveltejs/adapter-static';
+
+const config = {
+  kit: {
+    adapter: adapter({ fallback: 'index.html' })
+  }
+};
+
+export default config;
+```
+
+Build and serve with any web server (nginx, caddy, etc.):
+
+```bash
+bun run build
+
+# The output is in the build/ directory
+# Serve with your preferred web server
+```
+
+### Reverse Proxy
+
+When running behind a reverse proxy, make sure to:
+
+1. Set `VITE_API_URL` to your backend's public URL at **build time** (it's baked into the client bundle)
+2. Proxy API requests or configure CORS on the Elysia backend
+
+<details>
+<summary>Nginx example</summary>
+
+```nginx
+server {
+    listen 80;
+    server_name blending.example.com;
+
+    location / {
+        proxy_pass http://localhost:8711;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+</details>
 
 ---
 
@@ -128,6 +230,12 @@ src/
 │   ├── mock/           # Mock data for development
 │   └── utils/          # Utilities (edge-id, debounce)
 ```
+
+---
+
+## License
+
+[MIT](LICENSE)
 
 ---
 

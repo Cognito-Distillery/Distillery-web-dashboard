@@ -5,15 +5,21 @@
 	import { uiStore } from '$lib/stores/ui.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import { mockGraphData } from '$lib/mock/graph-data';
+	import { fetchGraph } from '$lib/api/graph';
 	import { t } from '$lib/i18n/index.svelte';
 
+	const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 	let graphCanvas: ReturnType<typeof GraphCanvas> | undefined = $state();
 
-	onMount(() => {
+	onMount(async () => {
 		uiStore.setLoading(true);
 		try {
-			// Use mock data for development
-			graphStore.setGraphData(mockGraphData);
+			if (USE_MOCK) {
+				graphStore.setGraphData(mockGraphData);
+			} else {
+				const data = await fetchGraph();
+				graphStore.setGraphData(data);
+			}
 		} catch {
 			toastStore.show(t('error.loadGraph'));
 		} finally {
